@@ -1,5 +1,6 @@
 package com.heunghan.ktorsmaple
 
+import android.os.Build
 import com.google.gson.Gson
 import io.ktor.client.HttpClient
 import io.ktor.client.features.HttpResponseValidator
@@ -27,6 +28,13 @@ object CustomHttpClient {
                 url {
                     this.host = host
                     port?.let { this.port = it }
+                    header(
+                            "User-Agent",
+                            "Android"
+                            + "/${BuildConfig.VERSION_NAME}"
+                            + "/Android ${Build.VERSION.RELEASE}"
+                            + "/${Build.MANUFACTURER} - ${Build.MODEL}"
+                    )
                     header.forEach { (key, value) ->
                         header(key, value)
                     }
@@ -54,7 +62,8 @@ object CustomHttpClient {
             method: HttpMethod,
             path: String,
             query: Map<String, Any> = emptyMap(),
-            body: Map<String, Any> = emptyMap()
+            body: Map<String, Any> = emptyMap(),
+            appendHeader: Map<String, Any> = emptyMap()
     ): T? {
         val client = defaultClient
         try {
@@ -64,17 +73,33 @@ object CustomHttpClient {
 
                     url {
                         encodedPath = path
-                        query.forEach { (key, value) ->
-                            parameter(key, value)
+                        appendHeader.forEach { (key, value) ->
+                            header(key, value)
                         }
                     }
 
-                    if (body.isNotEmpty()) {
-                        this.body = Gson().toJson(body)
+                    when (method) {
+                        HttpMethod.Get -> {
+                            query.forEach { (key, value) ->
+                                parameter(key, value)
+                            }
+                            body.forEach { (key, value) ->
+                                parameter(key, value)
+                            }
+                        }
+                        HttpMethod.Post,
+                        HttpMethod.Put,
+                        HttpMethod.Delete -> {
+                            if (body.isNotEmpty()) {
+                                this.body = Gson().toJson(body)
+                            }
+                        }
                     }
                 }
             }
         } catch (cause: Throwable) {
+            //TODO this is error
+//            return cause
             return null
         }
     }
