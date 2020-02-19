@@ -4,6 +4,7 @@ import android.os.Build
 import com.google.gson.Gson
 import io.ktor.client.HttpClient
 import io.ktor.client.features.HttpResponseValidator
+import io.ktor.client.features.UserAgent
 import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
@@ -28,17 +29,16 @@ object CustomHttpClient {
                 url {
                     this.host = host
                     port?.let { this.port = it }
-                    header(
-                            "User-Agent",
-                            "Android"
-                            + "/${BuildConfig.VERSION_NAME}"
-                            + "/Android ${Build.VERSION.RELEASE}"
-                            + "/${Build.MANUFACTURER} - ${Build.MODEL}"
-                    )
                     header.forEach { (key, value) ->
                         header(key, value)
                     }
                 }
+            }
+            install(UserAgent) {
+                agent = "Android" +
+                        "/${BuildConfig.VERSION_NAME}" +
+                        "/Android ${Build.VERSION.RELEASE}" +
+                        "/${Build.MANUFACTURER} - ${Build.MODEL}"
             }
             install(JsonFeature) {
                 serializer = GsonSerializer {
