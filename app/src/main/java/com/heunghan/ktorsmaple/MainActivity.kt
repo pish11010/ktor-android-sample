@@ -15,12 +15,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun request() {
-        val result: GithubResponse? = CustomHttpClient.request(
-                HttpMethod.Get, "/"
-        )
+        val github = CustomNet.GithubApi.get()
+        val user = CustomNet.GithubApi.getUser("pish11010")
+        val users = CustomNet.GithubApi.searchUsers("pish11010")
     }
 
-    private data class GithubResponse(
-            @SerializedName("current_user_url") val isActive: Boolean
-    )
 }
