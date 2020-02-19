@@ -14,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 
 object CustomHttpClient {
     val defaultClient = createClient(
-            "api.github.com"
+            BuildConfig.CUSTOM_SERVER_HOST
     )
 
     private fun createClient(

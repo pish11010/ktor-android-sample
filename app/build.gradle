@@ -16,8 +16,13 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-        release {
+        debug {
+            it.buildConfigField 'String', 'CUSTOM_SERVER_HOST', '"api.github.com"'
             minifyEnabled false
+        }
+        release {
+            it.buildConfigField 'String', 'CUSTOM_SERVER_HOST', '"api.github.com"'
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
