@@ -21,17 +21,17 @@ import kotlinx.coroutines.runBlocking
 
 object CustomHttpClient {
     val defaultClient = createClient(
-            BuildConfig.CUSTOM_SERVER_HOST
+        BuildConfig.CUSTOM_SERVER_HOST
     )
 
     val gson = GsonBuilder()
-            .serializeNulls()
-            .create()
+        .serializeNulls()
+        .create()
 
     private fun createClient(
-            host: String,
-            port: Int? = null,
-            header: Map<String, String> = emptyMap()
+        host: String,
+        port: Int? = null,
+        header: Map<String, String> = emptyMap()
     ): HttpClient {
         return HttpClient {
             defaultRequest {
@@ -70,11 +70,11 @@ object CustomHttpClient {
 
 
     inline fun <reified T> request(
-            method: HttpMethod,
-            path: String,
-            query: Map<String, Any> = emptyMap(),
-            body: Map<String, Any> = emptyMap(),
-            appendHeader: Map<String, Any> = emptyMap()
+        method: HttpMethod,
+        path: String,
+        query: Map<String, Any> = emptyMap(),
+        body: Map<String, Any> = emptyMap(),
+        appendHeader: Map<String, Any> = emptyMap()
     ) = runBlocking {
         try {
             val requestBuilder = createRequestBuilder(method, path, query, body, appendHeader)
@@ -85,11 +85,11 @@ object CustomHttpClient {
     }
 
     inline fun <reified DATA, reified ERROR_DATA> requestResult(
-            method: HttpMethod,
-            path: String,
-            query: Map<String, Any> = emptyMap(),
-            body: Map<String, Any> = emptyMap(),
-            appendHeader: Map<String, Any> = emptyMap()
+        method: HttpMethod,
+        path: String,
+        query: Map<String, Any> = emptyMap(),
+        body: Map<String, Any> = emptyMap(),
+        appendHeader: Map<String, Any> = emptyMap()
     ) = runBlocking {
         try {
             val requestBuilder = createRequestBuilder(method, path, query, body, appendHeader)
@@ -106,11 +106,11 @@ object CustomHttpClient {
     }
 
     fun createRequestBuilder(
-            method: HttpMethod,
-            path: String,
-            query: Map<String, Any>,
-            body: Map<String, Any>,
-            appendHeader: Map<String, Any>
+        method: HttpMethod,
+        path: String,
+        query: Map<String, Any>,
+        body: Map<String, Any>,
+        appendHeader: Map<String, Any>
     ): HttpRequestBuilder.() -> Unit = {
         this.method = method
 
@@ -142,13 +142,13 @@ object CustomHttpClient {
 }
 
 inline fun <reified T> Gson.fromJson(string: String?): T? =
-        fromJson(string, object : TypeToken<T>() {}.type)
+    fromJson(string, object : TypeToken<T>() {}.type)
 
 data class ResponseData<DATA, ERROR_DATA> constructor(
-        val response: HttpResponse? = null,
-        val data: DATA? = null,
-        val errorData: ERROR_DATA? = null,
-        val cause: Throwable? = null
+    val response: HttpResponse? = null,
+    val data: DATA? = null,
+    val errorData: ERROR_DATA? = null,
+    val cause: Throwable? = null
 ) {
     val isSuccess: Boolean by lazy { response?.status?.isSuccess() ?: false }
     val hasException: Boolean by lazy { cause != null }
