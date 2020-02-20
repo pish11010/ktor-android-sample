@@ -67,15 +67,12 @@ object CustomHttpClient {
             query: Map<String, Any> = emptyMap(),
             body: Map<String, Any> = emptyMap(),
             appendHeader: Map<String, Any> = emptyMap()
-    ): T? {
-        return runBlocking {
-            return@runBlocking try {
-                defaultClient.request<T>(
-                        createRequestBuilder(method, path, query, body, appendHeader)
-                )
-            } catch (cause: Throwable) {
-                null
-            }
+    ) = runBlocking {
+        try {
+            val requestBuilder = createRequestBuilder(method, path, query, body, appendHeader)
+            defaultClient.request<T>(requestBuilder)
+        } catch (cause: Throwable) {
+            null
         }
     }
 
@@ -85,19 +82,18 @@ object CustomHttpClient {
             query: Map<String, Any> = emptyMap(),
             body: Map<String, Any> = emptyMap(),
             appendHeader: Map<String, Any> = emptyMap()
-    ): NetResult<DATA, ERROR_DATA> = runBlocking {
+    ) = runBlocking {
         try {
-            val response = defaultClient.request<HttpResponse>(
-                    createRequestBuilder(method, path, query, body, appendHeader)
-            )
+            val requestBuilder = createRequestBuilder(method, path, query, body, appendHeader)
+            val response = defaultClient.request<HttpResponse>(requestBuilder)
             val bodyStr = response.readText()
-            val result: NetResult<DATA, ERROR_DATA> = when (response.status.value) {
-                in 200..299 -> NetResult(response, data = gson.fromJson<DATA>(bodyStr))
-                else -> NetResult(response, errorData = gson.fromJson<ERROR_DATA>(bodyStr))
+            val result: ResponseData<DATA, ERROR_DATA> = when (response.status.value) {
+                in 200..299 -> ResponseData(response, data = gson.fromJson<DATA>(bodyStr))
+                else -> ResponseData(response, errorData = gson.fromJson<ERROR_DATA>(bodyStr))
             }
             result
         } catch (cause: Throwable) {
-            NetResult<DATA, ERROR_DATA>(cause = cause)
+            ResponseData<DATA, ERROR_DATA>(cause = cause)
         }
     }
 
@@ -140,7 +136,7 @@ object CustomHttpClient {
 inline fun <reified T> Gson.fromJson(string: String?): T? =
         fromJson(string, object : TypeToken<T>() {}.type)
 
-data class NetResult<DATA, ERROR_DATA> constructor(
+data class ResponseData<DATA, ERROR_DATA> constructor(
         val response: HttpResponse? = null,
         val data: DATA? = null,
         val errorData: ERROR_DATA? = null,

@@ -22,12 +22,12 @@ object CustomApi {
     internal object GitApi {
         private const val path = "/"
         private const val userSearchPath = "/search/users"
-        fun test(): NetResult<Unit, GithubError> =
+        fun test(): ResponseData<Unit, GithubError> =
             CustomHttpClient.requestResult(HttpMethod.Get, path + "123")
 
-        fun get(): NetResult<GithubResponse, Unit> = CustomHttpClient.requestResult(HttpMethod.Get, path)
+        fun get(): ResponseData<GithubResponse, Unit> = CustomHttpClient.requestResult(HttpMethod.Get, path)
 
-        fun searchUsers(id: String): NetResult<UserSearchResult, Unit> =
+        fun searchUsers(id: String): ResponseData<UserSearchResult, Unit> =
             CustomHttpClient.requestResult(
                 HttpMethod.Get, userSearchPath, query = mapOf("q" to id)
             )
