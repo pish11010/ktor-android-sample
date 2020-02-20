@@ -3,6 +3,7 @@ package com.heunghan.ktorsmaple
 import android.os.Build
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import io.ktor.client.HttpClient
 import io.ktor.client.features.*
 import io.ktor.client.features.json.GsonSerializer
@@ -11,13 +12,20 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.request
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readText
 import io.ktor.http.HttpMethod
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 
 object CustomHttpClient {
     val defaultClient = createClient(
             BuildConfig.CUSTOM_SERVER_HOST
     )
+
+    val gson = GsonBuilder()
+            .serializeNulls()
+            .create()
 
     private fun createClient(
             host: String,
@@ -52,6 +60,7 @@ object CustomHttpClient {
         }
     }
 
+
     inline fun <reified T> request(
             method: HttpMethod,
             path: String,
@@ -67,6 +76,28 @@ object CustomHttpClient {
             } catch (cause: Throwable) {
                 null
             }
+        }
+    }
+
+    inline fun <reified DATA, reified ERROR_DATA> requestResult(
+            method: HttpMethod,
+            path: String,
+            query: Map<String, Any> = emptyMap(),
+            body: Map<String, Any> = emptyMap(),
+            appendHeader: Map<String, Any> = emptyMap()
+    ): NetResult<DATA, ERROR_DATA> = runBlocking {
+        try {
+            val response = defaultClient.request<HttpResponse>(
+                    createRequestBuilder(method, path, query, body, appendHeader)
+            )
+            val bodyStr = response.readText()
+            val result: NetResult<DATA, ERROR_DATA> = when (response.status.value) {
+                in 200..299 -> NetResult(response, data = gson.fromJson<DATA>(bodyStr))
+                else -> NetResult(response, errorData = gson.fromJson<ERROR_DATA>(bodyStr))
+            }
+            result
+        } catch (cause: Throwable) {
+            NetResult<DATA, ERROR_DATA>(cause = cause)
         }
     }
 
@@ -104,4 +135,17 @@ object CustomHttpClient {
             }
         }
     }
+}
+
+inline fun <reified T> Gson.fromJson(string: String?): T? =
+        fromJson(string, object : TypeToken<T>() {}.type)
+
+data class NetResult<DATA, ERROR_DATA> constructor(
+        val response: HttpResponse? = null,
+        val data: DATA? = null,
+        val errorData: ERROR_DATA? = null,
+        val cause: Throwable? = null
+) {
+    val isSuccess: Boolean by lazy { response?.status?.isSuccess() ?: false }
+    val hasException: Boolean by lazy { cause != null }
 }
