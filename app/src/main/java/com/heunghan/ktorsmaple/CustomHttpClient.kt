@@ -8,6 +8,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.features.*
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.logging.*
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -52,6 +53,13 @@ object CustomHttpClient {
                 serializer = GsonSerializer {
                     serializeNulls()
                     disableHtmlEscaping()
+                }
+            }
+            install(Logging) {
+                logger = Logger.SIMPLE
+                level = when {
+                    BuildConfig.DEBUG -> LogLevel.ALL
+                    else -> LogLevel.NONE
                 }
             }
             HttpResponseValidator {
