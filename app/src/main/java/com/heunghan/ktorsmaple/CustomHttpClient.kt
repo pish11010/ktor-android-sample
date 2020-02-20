@@ -29,46 +29,41 @@ object CustomHttpClient {
         .create()
 
     private fun createClient(
-        host: String,
-        port: Int? = null,
-        header: Map<String, String> = emptyMap()
-    ): HttpClient {
-        return HttpClient {
-            defaultRequest {
-                url {
-                    this.host = host
-                    port?.let { this.port = it }
-                    header.forEach { (key, value) ->
-                        header(key, value)
-                    }
+        host: String, port: Int? = null, header: Map<String, String> = emptyMap()
+    ) = HttpClient {
+        defaultRequest {
+            url {
+                this.host = host
+                port?.let { this.port = it }
+                header.forEach { (key, value) ->
+                    header(key, value)
                 }
-            }
-            install(UserAgent) {
-                agent = "Android" +
-                        "/${BuildConfig.VERSION_NAME}" +
-                        "/Android ${Build.VERSION.RELEASE}" +
-                        "/${Build.MANUFACTURER} - ${Build.MODEL}"
-            }
-            install(JsonFeature) {
-                serializer = GsonSerializer {
-                    serializeNulls()
-                    disableHtmlEscaping()
-                }
-            }
-            install(Logging) {
-                logger = Logger.SIMPLE
-                level = when {
-                    BuildConfig.DEBUG -> LogLevel.ALL
-                    else -> LogLevel.NONE
-                }
-            }
-            HttpResponseValidator {
-                validateResponse { }
             }
         }
+        install(UserAgent) {
+            agent = "Android" +
+                    "/${BuildConfig.VERSION_NAME}" +
+                    "/Android ${Build.VERSION.RELEASE}" +
+                    "/${Build.MANUFACTURER} - ${Build.MODEL}"
+        }
+        install(JsonFeature) {
+            serializer = GsonSerializer {
+                serializeNulls()
+                disableHtmlEscaping()
+            }
+        }
+        install(Logging) {
+            logger = Logger.SIMPLE
+            level = when {
+                BuildConfig.DEBUG -> LogLevel.ALL
+                else -> LogLevel.NONE
+            }
+        }
+        HttpResponseValidator {
+            validateResponse { }
+        }
     }
-
-
+    
     inline fun <reified T> request(
         method: HttpMethod,
         path: String,
@@ -111,9 +106,8 @@ object CustomHttpClient {
         query: Map<String, Any>,
         body: Map<String, Any>,
         appendHeader: Map<String, Any>
-    ): HttpRequestBuilder.() -> Unit = {
+    ) = HttpRequestBuilder().apply {
         this.method = method
-
         url {
             encodedPath = path
             appendHeader.forEach { (key, value) ->
