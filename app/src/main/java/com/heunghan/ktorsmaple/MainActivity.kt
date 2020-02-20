@@ -15,22 +15,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestExample() {
-        val test = CustomNet.GithubApi.test()
+        val test = CustomApi.GithubApi.test()
         Log.d("ktor-sample", "test: $test")
-        val github = CustomNet.GithubApi.get()
+        val github = CustomApi.GithubApi.get()
         Log.d("ktor-sample", "github: $github")
-        val user = CustomNet.GithubApi.getUser("pish11010")
+        val user = CustomApi.GithubApi.getUser("pish11010")
         Log.d("ktor-sample", "user: $user")
-        val users = CustomNet.GithubApi.searchUsers("pish11010")
+        val users = CustomApi.GithubApi.searchUsers("pish11010")
         Log.d("ktor-sample", "users: $users")
     }
 
     private fun requestResultExample() {
-        val test = CustomNet.GitApi.test()
+        val test = CustomApi.GitApi.test()
         Log.d("ktor-sample", "test: $test")
-        val github = CustomNet.GitApi.get()
+        val github = CustomApi.GitApi.get()
         Log.d("ktor-sample", "github: $github")
-        val users = CustomNet.GitApi.searchUsers("pish11010")
+        val users = CustomApi.GitApi.searchUsers("pish11010")
         Log.d("ktor-sample", "users: $users")
     }
 

@@ -3,7 +3,7 @@ package com.heunghan.ktorsmaple
 import com.google.gson.annotations.SerializedName
 import io.ktor.http.HttpMethod
 
-object CustomNet {
+object CustomApi {
     internal object GithubApi {
         private const val path = "/"
         private const val userPath = "/users"
