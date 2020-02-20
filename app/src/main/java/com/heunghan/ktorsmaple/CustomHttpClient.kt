@@ -2,12 +2,12 @@ package com.heunghan.ktorsmaple
 
 import android.os.Build
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import io.ktor.client.HttpClient
-import io.ktor.client.features.HttpResponseValidator
-import io.ktor.client.features.UserAgent
-import io.ktor.client.features.defaultRequest
+import io.ktor.client.features.*
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.request
@@ -47,13 +47,7 @@ object CustomHttpClient {
                 }
             }
             HttpResponseValidator {
-                validateResponse {
-                    it.status
-                }
-                handleResponseException {
-                    it.message
-                }
-
+                validateResponse { }
             }
         }
     }
@@ -65,42 +59,49 @@ object CustomHttpClient {
             body: Map<String, Any> = emptyMap(),
             appendHeader: Map<String, Any> = emptyMap()
     ): T? {
-        val client = defaultClient
-        try {
-            return runBlocking {
-                return@runBlocking client.request<T?> {
-                    this.method = method
+        return runBlocking {
+            return@runBlocking try {
+                defaultClient.request<T>(
+                        createRequestBuilder(method, path, query, body, appendHeader)
+                )
+            } catch (cause: Throwable) {
+                null
+            }
+        }
+    }
 
-                    url {
-                        encodedPath = path
-                        appendHeader.forEach { (key, value) ->
-                            header(key, value)
-                        }
-                    }
+    fun createRequestBuilder(
+            method: HttpMethod,
+            path: String,
+            query: Map<String, Any>,
+            body: Map<String, Any>,
+            appendHeader: Map<String, Any>
+    ): HttpRequestBuilder.() -> Unit = {
+        this.method = method
 
-                    when (method) {
-                        HttpMethod.Get -> {
-                            query.forEach { (key, value) ->
-                                parameter(key, value)
-                            }
-                            body.forEach { (key, value) ->
-                                parameter(key, value)
-                            }
-                        }
-                        HttpMethod.Post,
-                        HttpMethod.Put,
-                        HttpMethod.Delete -> {
-                            if (body.isNotEmpty()) {
-                                this.body = Gson().toJson(body)
-                            }
-                        }
-                    }
+        url {
+            encodedPath = path
+            appendHeader.forEach { (key, value) ->
+                header(key, value)
+            }
+        }
+
+        when (method) {
+            HttpMethod.Get -> {
+                query.forEach { (key, value) ->
+                    parameter(key, value)
+                }
+                body.forEach { (key, value) ->
+                    parameter(key, value)
                 }
             }
-        } catch (cause: Throwable) {
-            //TODO this is error
-//            return cause
-            return null
+            HttpMethod.Post,
+            HttpMethod.Put,
+            HttpMethod.Delete -> {
+                if (body.isNotEmpty()) {
+                    this.body = Gson().toJson(body)
+                }
+            }
         }
     }
 }
